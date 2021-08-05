@@ -17,12 +17,12 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
     bytes32 private constant _IMPLEMENTATION_SLOT =
         0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc;
 
-    constructor(address implementation_) {
+    constructor(address implementation_, bytes memory data_) {
         assert(
             _IMPLEMENTATION_SLOT ==
                 bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1)
         );
-        _setImplementation(implementation_);
+        _upgradeToAndCall(implementation_, data_);
     }
 
     function implementation() public view returns (address) {
@@ -30,8 +30,14 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
     }
 
     function upgradeTo(address newImplementation) public ifAdmin {
-        _setImplementation(newImplementation);
-        emit Upgraded(newImplementation);
+        _upgradeToAndCall(newImplementation, bytes(""));
+    }
+
+    function upgradeToAndCall(address newImplementation, bytes memory data)
+        public
+        ifAdmin
+    {
+        _upgradeToAndCall(newImplementation, data);
     }
 
     function _implementation() internal view override returns (address impl) {
@@ -39,6 +45,18 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
         // solhint-disable-next-line
         assembly {
             impl := sload(slot)
+        }
+    }
+
+    function _upgradeToAndCall(address newImplementation, bytes memory data)
+        private
+    {
+        _setImplementation(newImplementation);
+
+        emit Upgraded(newImplementation);
+
+        if (data.length > 0) {
+            Address.functionDelegateCall(newImplementation, data);
         }
     }
 
