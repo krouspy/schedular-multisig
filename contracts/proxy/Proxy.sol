@@ -2,13 +2,16 @@
 pragma solidity ^0.8.4;
 
 abstract contract Proxy {
+    /*
+     * @dev Get implementation address
+     * Should override it to read implementation address in IMPLEMENTATION_SLOT
+     */
     function _implementation() internal view virtual returns (address);
 
     /*
      * Delegates call to the Implementation contract
      * https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies#proxy-forwarding
      */
-
     function _fallback() internal {
         address _impl = _implementation();
         // solhint-disable-next-line
