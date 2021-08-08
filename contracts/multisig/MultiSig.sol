@@ -2,7 +2,12 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Address.sol";
+import "../proxy/UpgradeabilityProxy.sol";
 
+/*
+ * MultiSig contract that allows us to manage proposals and upgrade proxy contract
+ * For simplicity, we only consider proposals one at a time so creating new proposals requires the last proposal to be ended (Accepted or Refused)
+ */
 contract MultiSig {
     event SignerAdded(address signer);
     event ProposalCreated(uint256 id, address proposer);
@@ -21,7 +26,7 @@ contract MultiSig {
         ProposalStatus status;
     }
 
-    address public proxy;
+    address payable public proxy;
     address[] public signers;
     mapping(address => bool) public isSigner;
     // map address => proposalId => bool
@@ -32,7 +37,7 @@ contract MultiSig {
     uint8 public confirmationsRequired;
 
     constructor(
-        address _proxy,
+        address payable _proxy,
         address[] memory _signers,
         uint8 _confirmationsRequired
     ) {
@@ -70,12 +75,19 @@ contract MultiSig {
     }
 
     /*
-     * @dev Create a proposal only if caller is signer and last proposal is over
-     * params:
-     * - implementation is the address of the new implementation
+     * @dev Create a new proposal
+
+     * Params:
+     * - implementation is the address of the new implementation to which proxy contract will point
+     *
+     * Requirements:
+     *
+     * - Caller must be signer
+     * - Last proposal must have ended
+     * - Implementation must be a contract
      */
     function createProposal(address implementation) public onlySigner {
-        require(_lastProposalEnded(), "last proposal has not ended");
+        require(!_proposalStillPending(), "last proposal not ended yet");
         require(
             Address.isContract(implementation),
             "implementation must be a contract"
@@ -93,10 +105,18 @@ contract MultiSig {
     }
 
     /*
-     * @dev Approve a proposal only if caller is signer and last proposal in over
+     * @dev Caller approves most recent proposal
+     *
+     * Requirements:
+     * - Caller must be signer
+     * - Caller must not have approved yet
+     * - Proposal must not have ended yet
      */
-    function approveProposal(uint256 proposalId) public onlySigner {
-        require(!_proposalEnded(proposalId), "proposal is over");
+    function approveProposal() public onlySigner {
+        require(_proposalStillPending(), "proposal already ended");
+
+        uint256 proposalId = proposals.length - 1;
+
         require(
             signerToApprovals[msg.sender][proposalId] == false,
             "signer has already approved proposal"
@@ -107,15 +127,26 @@ contract MultiSig {
 
         signerToApprovals[msg.sender][proposalId] = true;
 
+        if (proposal.approvals >= confirmationsRequired) {
+            _executeProposal();
+        }
+
         emit Approval(proposalId, true);
     }
 
     /*
-     * @dev Revoke caller own approval
-     * Proposal must be pending and caller must have already approved before
+     * @dev Caller revokes his own approval for most recent proposal
+     *
+     * Requirements:
+     * - Caller must be signer
+     * - Caller must have already approved proposal
+     * - Proposal must not have ended yet
      */
-    function revokeApproval(uint256 proposalId) public onlySigner {
-        require(!_proposalEnded(proposalId), "proposal is over");
+    function revokeApproval() public onlySigner {
+        require(_proposalStillPending(), "proposal already ended");
+
+        uint256 proposalId = proposals.length - 1;
+
         require(
             signerToApprovals[msg.sender][proposalId] == true,
             "signer has not approved proposal yet"
@@ -129,23 +160,36 @@ contract MultiSig {
         emit Approval(proposalId, false);
     }
 
+    function _executeProposal() private {
+        uint256 proposalId = proposals.length - 1;
+        Proposal storage proposal = proposals[proposalId];
+        proposal.status = ProposalStatus.ACCEPTED;
+
+        UpgradeabilityProxy(proxy).upgradeTo(proposal.implementation);
+    }
+
     /*
      * @dev Check if last proposal has ended
      * if there's no proposal yet then we assume it's ended
      */
-    function _lastProposalEnded() private view returns (bool) {
+    function _proposalStillPending() private view returns (bool) {
         if (proposals.length == 0) {
-            return true;
+            return false;
         }
+
         uint256 proposalId = proposals.length - 1;
-        return _proposalEnded(proposalId);
-    }
-
-    function _proposalEnded(uint256 proposalId) private view returns (bool) {
         Proposal memory proposal = proposals[proposalId];
-        return proposal.status != ProposalStatus.PENDING;
+        return proposal.status == ProposalStatus.PENDING;
     }
 
+    /*
+     * @dev Caller adds a new signer
+     *
+     * Requirements:
+     * - Caller must be signer
+     * - new signer must not be address(0)
+     * - new signer must not already be signer
+     */
     function _addSigner(address newSigner) private {
         require(newSigner != address(0), "address must not be address(0)");
         require(!isSigner[newSigner], "address already registered as signer");
