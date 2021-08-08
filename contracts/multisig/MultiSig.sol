@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
+import "@openzeppelin/contracts/utils/Address.sol";
+
 contract MultiSig {
     event SignerAdded(address signer);
     event ProposalCreated(uint256 id, address proposer);
@@ -14,10 +16,12 @@ contract MultiSig {
 
     struct Proposal {
         address proposer;
+        address implementation;
         uint8 approvals;
         ProposalStatus status;
     }
 
+    address public proxy;
     address[] public signers;
     mapping(address => bool) public isSigner;
     // map address => proposalId => bool
@@ -27,12 +31,18 @@ contract MultiSig {
 
     uint8 public confirmationsRequired;
 
-    constructor(address[] memory _signers, uint8 _confirmationsRequired) {
+    constructor(
+        address _proxy,
+        address[] memory _signers,
+        uint8 _confirmationsRequired
+    ) {
+        require(Address.isContract(_proxy), "proxy must be a contract");
         require(
             _confirmationsRequired <= _signers.length,
             "confirmations threshold too large"
         );
 
+        proxy = _proxy;
         confirmationsRequired = _confirmationsRequired;
 
         for (uint8 i = 0; i < _signers.length; i++) {
@@ -61,12 +71,19 @@ contract MultiSig {
 
     /*
      * @dev Create a proposal only if caller is signer and last proposal is over
+     * params:
+     * - implementation is the address of the new implementation
      */
-    function createProposal() public onlySigner {
+    function createProposal(address implementation) public onlySigner {
         require(_lastProposalEnded(), "last proposal has not ended");
+        require(
+            Address.isContract(implementation),
+            "implementation must be a contract"
+        );
 
         Proposal memory proposal;
         proposal.proposer = msg.sender;
+        proposal.implementation = implementation;
         proposal.status = ProposalStatus.PENDING;
         proposals.push(proposal);
 
