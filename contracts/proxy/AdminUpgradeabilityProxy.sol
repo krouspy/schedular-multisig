@@ -3,12 +3,15 @@ pragma solidity ^0.8.4;
 
 import "./Proxy.sol";
 
-// https://eips.ethereum.org/EIPS/eip-1967
+/*
+ * This contract manages the admin role
+ * The admin address is stored at slot _ADMIN_SLOT to avoid eventual conflicts with implementation contracts
+ */
 abstract contract AdminUpgradeabilityProxy is Proxy {
     event AdminChanged(address previousAdmin, address newAdmin);
 
     /*
-     * @dev Storage slot for the contract admin address - To avoid clashing between Proxy and Logic contracts
+     * @dev Storage slot for the contract admin address
      * Obtained by computing bytes32(uint256(keccak256('eip1967.proxy.admin')) - 1)
      */
     bytes32 private constant _ADMIN_SLOT =
@@ -38,12 +41,20 @@ abstract contract AdminUpgradeabilityProxy is Proxy {
         return _admin();
     }
 
+    /*
+     * @dev Transfer admin to new address
+     *
+     * Requirements:
+     * - Caller must be admin
+     */
     function changeAdmin(address newAdmin) external ifAdmin {
-        require(newAdmin != address(0), "Must not be address(0)");
         emit AdminChanged(_admin(), newAdmin);
         _setAdmin(newAdmin);
     }
 
+    /*
+     * @dev Get admin address from slot _ADMIN_SLOT
+     */
     function _admin() private view returns (address adm) {
         bytes32 slot = _ADMIN_SLOT;
         // solhint-disable-next-line
@@ -52,7 +63,18 @@ abstract contract AdminUpgradeabilityProxy is Proxy {
         }
     }
 
+    /*
+     * @dev Transfer admin to new address
+     * Modify address stored at ADMIN_SLOT
+     *
+     * Requirements:
+     * - New admin address must not be address(0)
+     * - New admin address must not be address(0)
+     */
     function _setAdmin(address newAdmin) private {
+        require(newAdmin != address(0), "Must not be address(0)");
+        require(newAdmin != _admin(), "Must not be address(0)");
+
         bytes32 slot = _ADMIN_SLOT;
         // solhint-disable-next-line
         assembly {
