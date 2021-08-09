@@ -9,7 +9,16 @@ async function getProxiedStorage(name, proxyAddress, signer) {
   return new ethers.Contract(proxyAddress, Contract.interface, signer);
 }
 
+async function deployMultisig(proxy, signers, confirmationsRequired) {
+  const [signer1, signer2] = signers;
+  const signersAddresses = [signer1.address, signer2.address];
+  const args = [proxy, signersAddresses, confirmationsRequired];
+  const multisig = await deploy('MultiSig', args);
+  return multisig;
+}
+
 module.exports = {
   deploy,
   getProxiedStorage,
+  deployMultisig,
 };
