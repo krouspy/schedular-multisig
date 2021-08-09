@@ -40,6 +40,9 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
         _upgradeToAndCall(newImplementation, data);
     }
 
+    /*
+     * @dev Returns implementation address from _IMPLEMENTATION_SLOT
+     */
     function _implementation() internal view override returns (address impl) {
         bytes32 slot = _IMPLEMENTATION_SLOT;
         // solhint-disable-next-line
@@ -48,6 +51,12 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
         }
     }
 
+    /*
+     * @dev Modify implementation and delegate call if data is not empty
+     *
+     * Requirements:
+     * - address must be a contract
+     */
     function _upgradeToAndCall(address newImplementation, bytes memory data)
         private
     {
@@ -60,6 +69,13 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
         }
     }
 
+    /*
+     * @dev Modify implementation address stored at _IMPLEMENTATION_SLOT
+     *
+     * Requirements:
+     * - newImplementation must be a contract
+     * - newImplementation must be not be address(0) - verified by Address.isContract()
+     */
     function _setImplementation(address newImplementation) private {
         require(
             Address.isContract(newImplementation),

@@ -76,12 +76,11 @@ contract MultiSig {
 
     /*
      * @dev Create a new proposal
-
+     *
      * Params:
      * - implementation is the address of the new implementation to which proxy contract will point
      *
      * Requirements:
-     *
      * - Caller must be signer
      * - Last proposal must have ended
      * - Implementation must be a contract
