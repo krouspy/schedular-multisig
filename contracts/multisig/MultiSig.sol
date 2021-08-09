@@ -128,7 +128,7 @@ contract MultiSig {
         signerToApprovals[msg.sender][proposalId] = true;
 
         if (proposal.approvals >= confirmationsRequired) {
-            _executeProposal();
+            _executeProposal(proposalId);
         }
 
         emit Approval(proposalId, true);
@@ -160,8 +160,7 @@ contract MultiSig {
         emit Approval(proposalId, false);
     }
 
-    function _executeProposal() private {
-        uint256 proposalId = proposals.length - 1;
+    function _executeProposal(uint256 proposalId) private {
         Proposal storage proposal = proposals[proposalId];
         proposal.status = ProposalStatus.ACCEPTED;
 
