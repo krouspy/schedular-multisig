@@ -41,6 +41,7 @@ contract MultiSig {
         address[] memory _signers,
         uint8 _confirmationsRequired
     ) {
+        require(_signers.length >= 2, "multisig needs at least 2 signers");
         require(Address.isContract(_proxy), "proxy must be a contract");
         require(
             _confirmationsRequired <= _signers.length,
