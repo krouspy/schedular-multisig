@@ -18,7 +18,7 @@ describe('Multisig', function () {
 
   beforeEach(async () => {
     [deployer, signer1, signer2, non_signer] = await ethers.getSigners();
-    const signers = [signer1, signer2];
+    const signers = [signer1.address, signer2.address];
 
     implementationV1 = (await deploy('StorageV1')).address;
     implementationV2 = (await deploy('StorageV2')).address;

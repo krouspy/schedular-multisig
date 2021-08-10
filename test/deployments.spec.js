@@ -30,7 +30,7 @@ describe('Deployments', function () {
         initialize_implementation,
       ]);
 
-      signers = [signer1, signer2];
+      signers = [signer1.address, signer2.address];
       multisig = await deployMultisig(
         proxy.address,
         signers,
@@ -40,6 +40,17 @@ describe('Deployments', function () {
 
     it('should set proxy address', async () => {
       expect(await multisig.proxy()).to.be.equal(proxy.address);
+    });
+
+    it('should have at least two signers', async () => {
+      const zero_signer = [];
+      const one_signer = [signer1.address];
+      await expect(
+        deployMultisig(proxy.address, zero_signer, confirmations_required),
+      ).to.be.reverted;
+      await expect(
+        deployMultisig(proxy.address, one_signer, confirmations_required),
+      ).to.be.reverted;
     });
 
     // initialized in constructor
