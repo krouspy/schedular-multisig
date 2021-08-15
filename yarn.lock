@@ -34,6 +34,11 @@
     ethers "^5.0.21"
     typescript "^4.2.4"
 
+"@acala-network/contracts@^1.0.22":
+  version "1.0.22"
+  resolved "https://registry.yarnpkg.com/@acala-network/contracts/-/contracts-1.0.22.tgz#1481d00a8a3f4a6a4d8ad578d5423fc5722bd7ba"
+  integrity sha512-qWcFa8rBGWyveg4wLp0i3xVQ1uTiJU9NkWWSH2XMmabSIMk03emc2mJ7Hnn5tmDpSM/agLLvKwq5F98u72+GEw==
+
 "@acala-network/type-definitions@2.0.2-3":
   version "2.0.2-3"
   resolved "https://registry.yarnpkg.com/@acala-network/type-definitions/-/type-definitions-2.0.2-3.tgz#af323f1b1e0c2b7c373bea27ef68d14226c07087"
