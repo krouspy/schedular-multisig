@@ -19,7 +19,7 @@ async function getContractFactories() {
   };
 }
 
-const nextBlock = async (provider, signer, blockNumber) => {
+async function nextBlock(provider, signer, blockNumber) {
   return new Promise((resolve) => {
     provider.api.tx.system
       .remark(blockNumber.toString(16))
@@ -29,16 +29,20 @@ const nextBlock = async (provider, signer, blockNumber) => {
         }
       });
   });
-};
+}
+
+async function getCurrentBlockNumber(provider) {
+  return Number(await provider.api.query.system.number());
+}
 
 async function mineBlocks(provider, signer) {
-  let currentBlockNumber = Number(await provider.api.query.system.number());
+  let currentBlockNumber = await getCurrentBlockNumber(provider);
   const targetBlockNumber =
     Number(await provider.api.query.system.number()) + 10;
 
   while (currentBlockNumber < targetBlockNumber) {
     await nextBlock(provider, signer, currentBlockNumber);
-    currentBlockNumber = Number(await provider.api.query.system.number());
+    currentBlockNumber = await getCurrentBlockNumber(provider);
   }
 }
 
