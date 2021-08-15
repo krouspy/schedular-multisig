@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.4;
+pragma experimental ABIEncoderV2;
+pragma solidity ^0.6.4;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../proxy/UpgradeabilityProxy.sol";
@@ -40,7 +41,7 @@ contract MultiSig {
         address payable _proxy,
         address[] memory _signers,
         uint8 _confirmationsRequired
-    ) {
+    ) public {
         require(_signers.length >= 2, "multisig needs at least 2 signers");
         require(Address.isContract(_proxy), "proxy must be a contract");
         require(
