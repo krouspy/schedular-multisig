@@ -2,6 +2,8 @@
 pragma experimental ABIEncoderV2;
 pragma solidity ^0.6.4;
 
+import "@acala-network/contracts/schedule/ISchedule.sol";
+import "@acala-network/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../proxy/UpgradeabilityProxy.sol";
 
@@ -9,10 +11,11 @@ import "../proxy/UpgradeabilityProxy.sol";
  * MultiSig contract that allows us to manage proposals and upgrade proxy contract
  * For simplicity, we only consider proposals one at a time so creating new proposals requires the last proposal to be ended (Accepted or Refused)
  */
-contract MultiSig {
+contract MultiSig is ADDRESS {
     event SignerAdded(address signer);
     event ProposalCreated(uint256 id, address proposer);
     event Approval(uint256 proposalId, bool isApproved);
+    event ProposalApproved(uint256 id);
 
     enum ProposalStatus {
         ACCEPTED,
@@ -26,6 +29,8 @@ contract MultiSig {
         uint8 approvals;
         ProposalStatus status;
     }
+
+    ISchedule scheduler = ISchedule(ADDRESS.Schedule);
 
     address payable public proxy;
     address[] public signers;
@@ -165,7 +170,15 @@ contract MultiSig {
         Proposal storage proposal = proposals[proposalId];
         proposal.status = ProposalStatus.ACCEPTED;
 
-        UpgradeabilityProxy(proxy).upgradeTo(proposal.implementation);
+        // minimum number of blocks before the scheduled call is triggered
+        uint256 minDelay = 3;
+
+        // call upgradeTo(proxy) after 3 blocks
+        // prettier-ignore
+        bytes memory input_data = abi.encodeWithSignature("upgradeTo(address)", proxy);
+        scheduler.scheduleCall(proxy, 0, 100000, 100, minDelay, input_data);
+
+        emit ProposalApproved(proposalId);
     }
 
     /*
