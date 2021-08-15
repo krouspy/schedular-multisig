@@ -37,8 +37,7 @@ async function getCurrentBlockNumber(provider) {
 
 async function mineBlocks(provider, signer) {
   let currentBlockNumber = await getCurrentBlockNumber(provider);
-  const targetBlockNumber =
-    Number(await provider.api.query.system.number()) + 10;
+  const targetBlockNumber = currentBlockNumber + 10;
 
   while (currentBlockNumber < targetBlockNumber) {
     await nextBlock(provider, signer, currentBlockNumber);
