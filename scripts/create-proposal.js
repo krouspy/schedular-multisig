@@ -1,5 +1,5 @@
 const ethers = require('ethers');
-const setup = require('./setup');
+const { setup } = require('./setup');
 const addresses = require('./config/addresses.json');
 const { getContractFactories } = require('./utils');
 

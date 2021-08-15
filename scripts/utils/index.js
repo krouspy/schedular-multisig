@@ -1,3 +1,4 @@
+const { createTestPairs } = require('@polkadot/keyring/testingPairs');
 const hre = require('hardhat');
 const fs = require('fs');
 const path = require('path');
@@ -18,6 +19,29 @@ async function getContractFactories() {
   };
 }
 
+const nextBlock = async (provider, signer, blockNumber) => {
+  return new Promise((resolve) => {
+    provider.api.tx.system
+      .remark(blockNumber.toString(16))
+      .signAndSend(signer, (result) => {
+        if (result.status.isInBlock) {
+          resolve(undefined);
+        }
+      });
+  });
+};
+
+async function mineBlocks(provider, signer) {
+  let currentBlockNumber = Number(await provider.api.query.system.number());
+  const targetBlockNumber =
+    Number(await provider.api.query.system.number()) + 10;
+
+  while (currentBlockNumber < targetBlockNumber) {
+    await nextBlock(provider, signer, currentBlockNumber);
+    currentBlockNumber = Number(await provider.api.query.system.number());
+  }
+}
+
 function writeAddresses(filename, data) {
   if (!fs.existsSync(config_dir)) {
     fs.mkdirSync(config_dir);
@@ -30,4 +54,5 @@ function writeAddresses(filename, data) {
 module.exports = {
   getContractFactories,
   writeAddresses,
+  mineBlocks,
 };

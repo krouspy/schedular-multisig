@@ -1,7 +1,7 @@
 const ethers = require('ethers');
-const setup = require('./setup');
+const { setup } = require('./setup');
 const addresses = require('./config/addresses.json');
-const { getContractFactories } = require('./utils');
+const { getContractFactories, mineBlocks } = require('./utils');
 
 const { proxy_address, multisig_address } = addresses;
 
@@ -19,7 +19,9 @@ async function main() {
     alice,
   );
 
+  console.log('hehe');
   const implementation_before = await proxy.implementation();
+  console.log('haha');
 
   console.log('Alice (signer 1) is approving proposal...');
   const approval_1 = await multisig.approveProposal();
@@ -29,9 +31,11 @@ async function main() {
   const approval_2 = await multisig.connect(bob).approveProposal();
   console.log(approval_2);
 
-  const implementation_after = await proxy.implementation();
+  console.log('Proposal accepted');
+  console.log('Mining blocks to trigger scheduled call...');
+  await mineBlocks(provider, alice._substrateAddress);
 
-  console.log('Proposal completed');
+  const implementation_after = await proxy.implementation();
   console.log(
     `implementation upgraded from ${implementation_before} to ${implementation_after}`,
   );

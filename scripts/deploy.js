@@ -1,5 +1,5 @@
 const ethers = require('ethers');
-const setup = require('./setup');
+const { setup } = require('./setup');
 const { getContractFactories, writeAddresses } = require('./utils');
 
 const initialize_implementation = ethers.utils.solidityKeccak256(

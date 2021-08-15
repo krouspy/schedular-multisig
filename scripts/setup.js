@@ -5,14 +5,15 @@ const {
 } = require('@acala-network/bodhi');
 const { WsProvider } = require('@polkadot/api');
 const { createTestPairs } = require('@polkadot/keyring/testingPairs');
+const { WS_URL } = require('./config');
 
-const WS_URL = 'ws://127.0.0.1:9944';
-
-const setup = async () => {
-  const provider = new Provider({
+const getProvider = () =>
+  new Provider({
     provider: new WsProvider(WS_URL),
   });
 
+const setup = async () => {
+  const provider = getProvider();
   await provider.api.isReady;
 
   const pairs = createTestPairs();
@@ -31,4 +32,7 @@ const setup = async () => {
   };
 };
 
-module.exports = setup;
+module.exports = {
+  getProvider,
+  setup,
+};
