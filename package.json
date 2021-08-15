@@ -6,19 +6,16 @@
   "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
-    "build": "waffle waffle.json",
     "test": "hardhat test",
-    "network": "hardhat node",
-    "console": "hardhat console --network localhost",
-    "deploy": "hardhat run scripts/deploy.js",
-    "proxy": "hardhat run scripts/upgrade.js --network localhost",
+    "deploy": "yarn compile && node scripts/deploy.js",
+    "create-proposal": "node scripts/create-proposal.js",
+    "approve-proposal": "node scripts/approve-proposal.js",
     "lint": "solhint 'contracts/*.sol' && solhint 'contracts/**/*.sol'"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "chai": "^4.2.0",
-    "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.21",
     "hardhat": "^2.5.0",
     "prettier": "^2.3.2",
