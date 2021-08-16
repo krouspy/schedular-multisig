@@ -5,7 +5,6 @@ pragma solidity ^0.6.4;
 import "@acala-network/contracts/schedule/ISchedule.sol";
 import "@acala-network/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-import "../proxy/UpgradeabilityProxy.sol";
 
 /*
  * MultiSig contract that allows us to manage proposals and upgrade proxy contract
@@ -76,6 +75,15 @@ contract MultiSig is ADDRESS {
         _addSigner(newSigner);
     }
 
+    /*
+     * @dev Get proposal by id
+     *
+     * Params:
+     * - Id of the proposal
+     *
+     * Requirements:
+     * - Id must be lower than proposals.length
+     */
     function getProposal(uint256 id) external view returns (Proposal memory) {
         require(id < proposals.length, "non-existent proposal");
         return proposals[id];
