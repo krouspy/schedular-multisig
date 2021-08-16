@@ -33,6 +33,10 @@ contract UpgradeabilityProxy is AdminUpgradeabilityProxy {
         _upgradeToAndCall(newImplementation, bytes(""));
     }
 
+    /*
+     * Calls _upgradeToAndCall(address, bytes) if caller is admin
+     * Otherwise delegates to the implementation contract
+     */
     function upgradeToAndCall(address newImplementation, bytes memory data)
         public
         ifAdmin

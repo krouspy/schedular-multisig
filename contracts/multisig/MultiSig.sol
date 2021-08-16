@@ -29,6 +29,7 @@ contract MultiSig is ADDRESS {
         ProposalStatus status;
     }
 
+    // points to the pre-deployed Schedule contract
     ISchedule scheduler = ISchedule(ADDRESS.Schedule);
 
     address payable public proxy;

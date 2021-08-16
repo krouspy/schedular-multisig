@@ -69,7 +69,7 @@ abstract contract AdminUpgradeabilityProxy is Proxy {
      *
      * Requirements:
      * - New admin address must not be address(0)
-     * - New admin address must not be address(0)
+     * - New admin address must not be the current admin
      */
     function _setAdmin(address newAdmin) private {
         require(newAdmin != address(0), "Must not be address(0)");
