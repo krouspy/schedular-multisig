@@ -19,9 +19,7 @@ async function main() {
     alice,
   );
 
-  console.log('hehe');
   const implementation_before = await proxy.implementation();
-  console.log('haha');
 
   console.log('Alice (signer 1) is approving proposal...');
   const approval_1 = await multisig.approveProposal();
