@@ -1,8 +1,8 @@
 ## Overview
 
-This repository contains an Upgradeable contract behind a Multisig contract. Multisig signers can propose upgrades and approve them. Once the total approvals reaches the confirmations required, a scheduled call is created to upgrade the contract and triggered after 3 blocks.
+This repository contains an Upgradeable contract behind a Multisig contract. Multisig signers can propose upgrades and approve them. Once the total approvals reaches the confirmations required, a scheduled call to upgrade the proxy contract is created and triggered after 3 blocks, using the Scheduler contract from Acala.
 
-## Environment
+### Environment
 
 Ubuntu 20.04 LTS
 
@@ -10,13 +10,15 @@ Docker v20.10.8
 
 Node v16.5.0
 
-## Installation
+### Installation
 
 Install dependencies
 
 ```
 $ yarn
 ```
+
+### Usage
 
 Compile contracts
 
@@ -35,8 +37,6 @@ Lint contracts
 ```
 $ yarn lint
 ```
-
-## Usage
 
 Scripts have been placed in the `scripts/` folder to show how to use the contracts, from deployment to approval of proposal.
 For simplicity, we use 2 signers and 2 required approvals.
