@@ -8,7 +8,6 @@ const {
 
 describe('Multisig', function () {
   let multisig;
-  let deployer;
   let proxy;
   let implementationV1;
   let implementationV2;

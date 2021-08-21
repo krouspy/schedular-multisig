@@ -3,7 +3,7 @@ const { setup } = require('./setup');
 const addresses = require('./config/addresses.json');
 const { getContractFactories } = require('./utils');
 
-const { proxy_address, multisig_address } = addresses;
+const { multisig_address } = addresses;
 
 /*
  * Alice, 1 on 2 signer, creates a proposal
@@ -11,8 +11,8 @@ const { proxy_address, multisig_address } = addresses;
  * run approve-proposal.js script
  */
 async function main() {
-  const { provider, alice, bob } = await setup();
-  const { Multisig, Proxy, StorageV2 } = await getContractFactories();
+  const { provider, alice} = await setup();
+  const { Multisig, StorageV2 } = await getContractFactories();
 
   const storageV2 = await StorageV2.connect(alice).deploy();
   await storageV2.deployed();
